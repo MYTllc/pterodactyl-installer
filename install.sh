@@ -47,12 +47,33 @@ curl -sSL -o /tmp/lib.sh "$GITHUB_BASE_URL"/master/lib/lib.sh
 # shellcheck source=lib/lib.sh
 source /tmp/lib.sh
 
+configure_webserver_port() {
+  # Ask the user for the web server port
+  read -p "What is the webserver port you want? (default is 80): " WEB_SERVER_PORT
+
+  # Set default port if no input is provided
+  WEB_SERVER_PORT=${WEB_SERVER_PORT:-80}
+
+  # Update the panel.conf file with the specified port
+  # Assuming panel.conf is located in /etc/nginx/sites-available/panel.conf
+  if [ -f /etc/nginx/sites-available/panel.conf ]; then
+    sed -i "s/listen 80;/listen $WEB_SERVER_PORT;/" /etc/nginx/sites-available/panel.conf
+    echo "Updated web server port to $WEB_SERVER_PORT in panel.conf"
+  else
+    echo "panel.conf file not found!"
+  fi
+}
+
 execute() {
   echo -e "\n\n* pterodactyl-installer $(date) \n\n" >>$LOG_PATH
 
   [[ "$1" == *"canary"* ]] && export GITHUB_SOURCE="master" && export SCRIPT_RELEASE="canary"
   update_lib_source
   run_ui "${1//_canary/}" |& tee -a $LOG_PATH
+
+  if [[ "$1" == "panel" || "$1" == "panel_canary" ]]; then
+    configure_webserver_port
+  fi
 
   if [[ -n $2 ]]; then
     echo -e -n "* Installation of $1 completed. Do you want to proceed to $2 installation? (y/N): "
@@ -110,5 +131,5 @@ while [ "$done" == false ]; do
   [[ " ${valid_input[*]} " =~ ${action} ]] && done=true && IFS=";" read -r i1 i2 <<<"${actions[$action]}" && execute "$i1" "$i2"
 done
 
-# Remove lib.sh, so next time the script is run the, newest version is downloaded.
+# Remove lib.sh, so next time the script is run the newest version is downloaded.
 rm -rf /tmp/lib.sh
