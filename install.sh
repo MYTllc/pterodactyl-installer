@@ -60,6 +60,18 @@ configure_webserver_port() {
     sed -i "s/listen 80;/listen $WEB_SERVER_PORT;/" /etc/nginx/sites-available/pterodactyl.conf
     sed -i "s/listen \[::\]:80;/listen \[::\]:$WEB_SERVER_PORT;/" /etc/nginx/sites-available/pterodactyl.conf
     echo "Updated web server port to $WEB_SERVER_PORT in pterodactyl.conf"
+
+    # Allow the port in ufw
+    ufw allow $WEB_SERVER_PORT
+
+    # Restart nginx
+    systemctl restart nginx
+
+    # Display the custom message
+    echo "\n▀▀█ █▀▀█ █▀▀█ █▀▀█"
+    echo "▄▀░ █░░█ █▄▄▀ █░░█"
+    echo "▀▀▀ ▀▀▀▀ ▀░▀▀ ▀▀▀▀\n"
+    echo "installation script edited by its.zoro"
   else
     echo "pterodactyl.conf file not found!"
   fi
