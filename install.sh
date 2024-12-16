@@ -54,15 +54,17 @@ configure_webserver_port() {
   # Set default port if no input is provided
   WEB_SERVER_PORT=${WEB_SERVER_PORT:-80}
 
-  # Update the panel.conf file with the specified port
-  # Assuming panel.conf is located in /etc/nginx/sites-available/panel.conf
-  if [ -f /etc/nginx/sites-available/panel.conf ]; then
-    sed -i "s/listen 80;/listen $WEB_SERVER_PORT;/" /etc/nginx/sites-available/panel.conf
-    echo "Updated web server port to $WEB_SERVER_PORT in panel.conf"
+  # Update the pterodactyl.conf file with the specified port
+  # Assuming pterodactyl.conf is located in /etc/nginx/sites-available/pterodactyl.conf
+  if [ -f /etc/nginx/sites-available/pterodactyl.conf ]; then
+    sed -i "s/listen 80;/listen $WEB_SERVER_PORT;/" /etc/nginx/sites-available/pterodactyl.conf
+    sed -i "s/listen \[::\]:80;/listen \[::\]:$WEB_SERVER_PORT;/" /etc/nginx/sites-available/pterodactyl.conf
+    echo "Updated web server port to $WEB_SERVER_PORT in pterodactyl.conf"
   else
-    echo "panel.conf file not found!"
+    echo "pterodactyl.conf file not found!"
   fi
 }
+
 
 execute() {
   echo -e "\n\n* pterodactyl-installer $(date) \n\n" >>$LOG_PATH
